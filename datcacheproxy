@@ -1,1 +1,1 @@
-perl datcacheproxy.pl
+perl datcacheproxy.pl $@
