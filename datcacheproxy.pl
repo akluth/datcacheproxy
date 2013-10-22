@@ -28,6 +28,10 @@ my $port = 31337;
 my $memcached;
 my $memcached_server = '127.0.0.1';
 my $memcached_port = '11211';
+my $redis;
+my $redis_server = '127.0.0.1';
+my $redis_port = '6379';
+my $redis_namespace = 'cacheproxy';
 my $cache_dir = '/tmp/datcacheproxy/cache';
 my $verbose;
 my $ultra_verbose;
@@ -37,6 +41,10 @@ GetOptions(
     'memcached', \$memcached,
     'memcached-server=s', \$memcached_server,
     'memcached-port=s', \$memcached_port,
+    'redis', \$redis,
+    'redis-server=s', \$redis_server,
+    'redis-port=s', \$redis_port,
+    'redis-namespace=s', \$redis_namespace,
     'cache-dir=s', \$cache_dir,
     'verbose', \$verbose,
     'ultra-verbose', \$ultra_verbose
@@ -47,12 +55,21 @@ GetOptions(
 my $cache;
 
 if ($memcached) {
-    print ' ! Trying to connect to memached server at ' . $memcached_server . ':' . $memcached_port .'...\n';
+    print ' ! Trying to connect to memached server at ' . $memcached_server . ':' . $memcached_port . "...\n";
 
     $cache = CHI->new(
         driver => 'Memcached::libmemcached',
         servers => $memcached_server . ':' . $memcached_port,
         l1_cache => { driver => 'FastMmap', root_dir => $cache_dir }
+    );
+} elsif ($redis) {
+    print ' ! Trying to connect to redis server at ' . $redis_server . ':' . $redis_port . "...\n";
+
+    $cache = CHI->new(
+        driver => 'Redis',
+        namespace => $redis_namespace,
+        server => $redis_server . ':' . $redis_port,
+        debug => 0
     );
 } else {
     print " ! Using filesystem as cache\n";
